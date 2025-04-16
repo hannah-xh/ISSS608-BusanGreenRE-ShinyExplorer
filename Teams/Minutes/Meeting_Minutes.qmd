@@ -1,0 +1,30 @@
+---
+title: "Meeting Minutes"
+---
+
+<style>
+  .custom-btn {
+    background-color: #A8D08D; /* 淺綠色背景 */
+    color: #FFFFFF; /* 白色文字 */
+    padding: 8px 16px; /* 內邊距 */
+    border: none; /* 無邊框 */
+    border-radius: 4px; /* 圓角 */
+    font-size: 14px; /* 字體大小 */
+    font-weight: 500; /* 中等字重 */
+    cursor: pointer; /* 滑鼠懸停時顯示手型 */
+    transition: background-color 0.3s; /* 過渡效果 */
+    text-decoration: none; /* 移除底線 */
+    display: inline-block; /* 確保按鈕行為 */
+  }
+  .custom-btn:hover {
+    background-color: #3B8C53; /* 懸停時變為較深的綠色 */
+  }
+</style>
+
+<a href="/Teams/Minutes/Meeting_Minutes1.html" class="custom-btn">Project Meeting 1: Project Dataset, Project Proposal and Project Timeline</a>
+
+<a href="/Teams/Minutes/Meeting_Minutes2.html" class="custom-btn">Project Meeting 2:  Project Proposal</a>
+
+<a href="/Teams/Minutes/Meeting_Minutes3.html" class="custom-btn">Project Meeting 3:  Project Proposal 2</a>
+
+<a href="/Teams/Minutes/Meeting_Minutes4.html" class="custom-btn">Project Meeting 4:  Project Poster </a>

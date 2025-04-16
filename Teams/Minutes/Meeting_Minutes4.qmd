@@ -1,0 +1,44 @@
+---
+title: "Project Meeting 4:  Project Poster  "
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+::: callout-tip
+## Info
+
+**Attendance**: Moo Jia Rong, Zhang Xiao Han, Chen Peng-Wei
+
+**Date**: 29/03/2025 4.00pm – 5.00pm
+
+**Meeting Agenda:**
+
+-   Decide Poster Design and Content
+-   Follow-up Action
+:::
+
+## Agenda Item 1: Decide Poster Design and Content
+
+The team agreed to use green color as the theme for the poster, based on the theme of the project. 
+
+Peng Wei suggested adding the QR code to our shiny app in the poster. Jia Rong thinks it depends on whether we can finish setting up the shiny app website before submission of the poster. Xiaohan suggested we can put QR code linked to group website. Finally, all agree we should link QR code directly to shiny app. 
+
+Xiao Han suggested only including the latent class analysis results into the poster for the explanatory modelling module, as there is not enough space to include the multiple regression results. The team agreed to pick the more interesting results to showcase in the poster. 
+
+Jia Rong suggested that each team member should work on the content for their own modules in the poster and additional work on one of the following sections: (1) Introduction, (2) brief description of the data set and the modules/ methodology for the project and (3) conclusion/future work. 
+
+## Agenda Item 2: Follow-up Action
+
+The group decided on the following deadlines: poster due Tuesday, individual Shiny app due Thursday. 
+
+The division of poster is as follows:\
+(1) Introduction + EDA/CDA =\> Jia Rong\
+(2) description of the data set and the methodology + predictive modelling=\> Peng Wei\
+(3) conclusion/future work + Cluster based on the best LCA results =\>Xiaohan
+
+The group also decided to merge the individual parts after each member completes their assigned section. Since the data preprocessing varies for each part, it was tentatively decided not to merge the data for now.
+
+The team agree that we can do our user guideline after the poster presentation if we can’t finish before the poster presentation.

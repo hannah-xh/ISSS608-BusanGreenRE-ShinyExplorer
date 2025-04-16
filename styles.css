@@ -1,0 +1,178 @@
+/* 整體樣式 */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f6f5; /* 淺灰綠色背景 */
+    color: #333; /* 深灰色文字 */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {height: 60px;
+    background-color: #8ab0ab !important; /* Dark Gray-Blue */
+}
+
+/* Change navbar text color */
+.navbar a, .navbar-brand, .navbar-nav .nav-link {
+    color: white !important; /* White text */
+}
+
+/* Change navbar text hover color */
+.navbar a:hover, .navbar-brand:hover, .navbar-nav .nav-link:hover {
+    color: #525355 !important; /* when hovering */
+    
+}
+/* 修改下拉選單的背景顏色和字體顏色 */
+.navbar .dropdown-menu {
+    background-color: #dfe2e2 !important; /* 白色背景 */
+    border: 1px solid #ccc; /* 可選：增加邊框 */
+}
+
+/* 修改下拉選單內文字顏色 */
+.navbar .dropdown-item {
+    color: #212529 !important; /* 深灰色文字 */
+}
+
+/* 當滑鼠懸停時的樣式 */
+.navbar .dropdown-item:hover {
+    background-color: #8ab0ab !important; /* 淺灰色背景 */
+    color: white !important; /* 更深的灰色文字 */
+}
+
+
+/* 標題 */
+h1, h2, h3 {
+    color: #4a7c59; /* 森林綠色，柔和又清新 */
+}
+
+h1 {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e6e0; /* 淺灰線條 */
+    padding-bottom: 10px;
+}
+
+
+
+
+/* 連結 */
+a {
+    color: #8ab0ab; /* 淡藍綠色 */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #4a7c59; /* 懸停時變成森林綠 */
+}
+
+/* 程式碼區塊 */
+pre, code {
+    background-color: #e0e6e0; 
+    border: 1px solid #e0e6e0;
+    border-radius: 5px;
+    padding: 10px;
+    font-family: 'Courier New', monospace;
+    color: #555;
+}
+
+/* 按鈕（如果有） */
+button, .btn {
+    background-color: #8ab0ab;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #4a7c59;
+}
+
+
+
+.tab-container {
+    display: flex;
+    justify-content: flex-start; /* 標籤靠左對齊，也可以改成 center */
+    margin-bottom: 20px;
+}
+
+/* 單個 Tab */
+.tab {
+    background-color: #e0e6e0; /* 淺灰色底 */
+    color: #555; /* 深灰文字 */
+    border-radius: 5px 5px 0 0; /* 上方圓角，下方直線 */
+    cursor: pointer;
+    transition: all 0.3s ease; /* 平滑過渡效果 */
+
+/* Hover 效果 */
+.tab:hover {
+    background-color: #8ab0ab; /* 淡藍綠色 */
+    color: white; /* 文字變白 */
+}
+
+/* Active（點擊或選中）效果 */
+.tab.active {
+    background-color: #4a7c59; /* 森林綠色 */
+    color: white; /* 文字變白 */
+    font-weight: 500; /* 稍微加粗 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 輕微陰影，提升層次感 */
+}
+
+/* Tab 內容區域 */
+.tab-content {
+    background-color: #fff; /* 白色背景 */
+    padding: 20px;
+    border: 1px solid #e0e6e0; /* 淺灰邊框 */
+    border-radius: 0 5px 5px 5px; /* 上方左邊直線，其他圓角 */
+}
+
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f6f5;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* 頁面容器 */
+.quarto-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    padding: 20px;
+}
+
+
+
+
+
+@media (max-width: 800px) {
+    .sidebar {
+        width: 200px;
+    }
+    .main-content {
+        margin-left: 240px;
+    }
+}
+
+@media (max-width: 600px) {
+    .top-bar {
+        flex-direction: column;
+        padding: 10px;
+    }
+    .sidebar {
+        position: static;
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #e0e6e0;
+    }
+    .main-content {
+        margin-left: 0;
+        margin-top: 20px;
+    }
+}

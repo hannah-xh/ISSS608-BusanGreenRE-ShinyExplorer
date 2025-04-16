@@ -1,0 +1,626 @@
+---
+title: "Predictive Modeling"
+author: "Chen.PengWei"
+date-modified: "last-modified"
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+# 1. Overview
+
+In this take-home exercise, I will perform a predictive modeling analysis (Decision Tree and Random Forest) for the upcoming group project. Further result will be posted on [here](https://isss608group5.netlify.app/).
+
+A dataset used is from this [research paper](https://www.sciencedirect.com/science/article/pii/S2352340924009715) to investigate variables influencing property prices in Korea. The dataset comprises of comprehensive information on the property prices in the Busan Metropolitan City of South Korea for transactions in 2018 to 2019 and 27 variables that influence property prices including characteristics of the property, distance to environmental amenities and local built environments, local demographic characteristics, and season in which the transaction occurred. 
+
+# 2. Getting Started 
+
+::: panel-tabset
+## Installing Libraries
+
+We will load the following packages:  
+
+-   tidyverse to wrangle data  
+-   SmartEDA to explore data 
+
+```{r}
+pacman::p_load(tidyverse,  SmartEDA, rpart, rpart.plot,randomForest,visNetwork,sparkline,caret, ranger, patchwork,doParallel,e1071,dplyr,ggplot2)
+```
+
+```{r}
+#| include: false
+Sys.setlocale("LC_TIME", "C")  
+```
+
+## Importing Dataset
+
+The description of each variable can be found in [here.](https://www.sciencedirect.com/science/article/pii/S2352340924009715)
+
+```{r}
+Property_data <- read_csv("data/Property_Price_and_Green_Index.csv")
+```
+
+## Glimpse Data
+
+Most of the variables in the dataset are continuous variables
+
+```{r}
+glimpse(Property_data)
+```
+:::
+
+### 2.1 Missing data
+
+We check for any columns with missing data using ExpData() from SmartEDA package. There are no missing data in this dataset. 
+
+```{r}
+Property_data %>% 
+  ExpData(type=2)
+```
+
+### 2.2 Duplicated Records 
+
+We check for presence of duplicated records using duplicated(). The results show that there are no duplicated records. 
+
+```{r}
+Property_data[duplicated(Property_data),]
+```
+
+# 3. Data Wrangling 
+
+## 3.1 Select variables
+
+Remove variables that are not useful for predictive modeling. Geographic data will not be used in this modeling.
+
+```{r}
+Property_data <- Property_data %>% 
+  select(!Longitude) %>% 
+  select(!Latitude) 
+```
+
+## 3.2 Create summer variable
+
+I will create a Summer variable, where Summer = 1 if the property is recorded in summer (i.e., Spring = 0, Fall = 0, and Winter = 0). Since Spring, Fall, and Winter are already binary-encoded, we do not need to encode them further.
+
+```{r}
+Property_data$summer <- ifelse(Property_data$Spring == 0 & Property_data$Fall == 0 & Property_data$Winter == 0, 1, 0)
+```
+
+Now check your data set again. There will be 27 variables with the new binary variable summer.
+
+```{r}
+glimpse(Property_data)
+```
+
+## 3.3 Rename the variable
+
+In R, it will be better for us using the column name without the blank.
+
+```{r}
+names(Property_data) <- gsub(" ", "_", names(Property_data))
+```
+
+# 4. Data check
+
+## 4.1 Outlier
+
+While decision trees are generally robust to outliers due to their non-parametric nature, it is recommended to check for outliers before training. Outliers may affect split point selection, especially when the feature range is large. In this analysis, we will inspect the data for outliers and decide on the appropriate action.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+
+num_cols <- sapply(Property_data, is.numeric)
+numeric_data <- Property_data[, num_cols]
+
+find_outliers <- function(x) {
+  stats <- boxplot.stats(x)$stats  
+  lower_bound <- stats[1]             
+  upper_bound <- stats[5]             
+  outliers <- x[x < lower_bound | x > upper_bound]
+  return(outliers)
+}
+
+boxplot(numeric_data, main="Box Plot for Numerical Data", las=2)
+```
+
+It is observed that the variable Dist_CBD has an extremely large range and a right-skewed distribution. To reduce skewness and stabilize the feature's range for better model performance, we apply a log transformation using log(X+1).
+
+```{r}
+Property_data$`Dist._CBD` <- log(Property_data$`Dist._CBD` + 1)
+```
+
+Now check outlier again.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+
+num_cols <- sapply(Property_data, is.numeric)
+numeric_data <- Property_data[, num_cols]
+
+find_outliers <- function(x) {
+  stats <- boxplot.stats(x)$stats  
+  lower_bound <- stats[1]             
+  upper_bound <- stats[5]             
+  outliers <- x[x < lower_bound | x > upper_bound]
+  return(outliers)
+}
+
+boxplot(numeric_data, main="Box Plot for Numerical Data", las=2)
+```
+
+After checking the numerical variables, we found that most outliers come from the Population variable. Since Population may have a meaningful relationship with our dependent variable Property_Prices (e.g., higher population density might correlate with higher property prices), we will remain these outliers for now and evaluate their impact on the model later.
+
+## 4.2 Correlation
+
+Before building the decision tree, it is necessary to check the correlation between variables. However, we will allow users to select the variables themselves in Shiny. By default, the pre-cleaned variable will be selected.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+
+cutoff <- 0.8
+
+num_cols <- sapply(Property_data, is.numeric)
+numeric_data <- Property_data[, num_cols]
+
+corr_matrix <- cor(numeric_data, use = "complete.obs")
+
+var_names <- names(numeric_data)
+
+for (i in 1:(ncol(numeric_data) - 1)) {
+  for (j in (i + 1):ncol(numeric_data)) {
+    cor_val <- corr_matrix[i, j]
+    if (abs(cor_val) > cutoff) {
+      cat("correlation coefficient between" , var_names[i], "and", var_names[j], 
+ round(cor_val, 3), "\n")
+    }
+  }
+}
+```
+
+Due to multicollinearity, one feature from each pair may need to be dropped.
+
+### 4.2.1 Feature selection
+
+To choose which feature we need to drop in each pair, do the simple decision tree to compare the variable's importance level for the dependent variable.
+
+```{r}
+model <- train(
+  Property_Prices ~ Dist._Green + Dist._CBD + Top_Univ. + High_School,
+  data = Property_data,
+  method = "rpart"
+)
+importance <- varImp(model)
+print(importance)
+```
+
+Now, drop the least important variable in each pair. We will drop "Dist.\_Green" and "High_School".
+
+```{r}
+Property_data_analysis <- Property_data[, 
+  !(names(Property_data) %in% c("Dist._Green", "High_School"))
+]
+```
+
+Before we start building the model, check the data again.
+
+```{r}
+glimpse(Property_data)
+```
+
+# 5. Regression Tree
+
+In this section, I developed a regression tree model to predict property prices (Property_Prices) using the rpart package in R. The process involved several key steps, including data preparation, model training, evaluation, and visualization.
+
+## 5.1 Building model
+
+First, plit the dataset into training (80%) and testing (20%) sets. Using 1234 as the seed amount.\
+In this case, Property_Prices is a continuous variable, so method = "anova" is the appropriate choice.
+
+```{r}
+names(Property_data_analysis) <- gsub(" ", "_", names(Property_data_analysis))
+set.seed(1234)
+
+trainIndex <- createDataPartition(Property_data_analysis$`Property_Prices`, p = 0.8, 
+                                  list = FALSE, 
+                                  times = 1)
+
+df_train <- Property_data_analysis[trainIndex,]
+df_test <- Property_data_analysis[-trainIndex,]
+```
+
+Trained an initial regression tree using rpart with the following parameters: minsplit = 5, cp = 0.001, and maxdepth = 10. These settings allowed the tree to grow with some constraints to avoid overfitting.
+
+```{r}
+anova.model <- function(min_split, complexity_parameter, max_depth) {
+  rpart(`Property_Prices` ~ ., 
+        data = df_train , 
+        method = "anova", 
+        control = rpart.control(minsplit = min_split, 
+                                cp = complexity_parameter, 
+                                maxdepth = max_depth))
+  }
+
+fit_tree <- anova.model(5, 0.001, 10)
+
+
+visTree(fit_tree, edgesFontSize = 14, nodesFontSize = 16, width = "100%")
+```
+
+## 5.2 Tuning of hyperparameters
+
+To optimize the tree, here we use the complexity parameter (CP) table (cptable) to identify the CP value that minimized the cross-validation error (xerror).
+
+```{r}
+printcp(fit_tree)
+```
+
+```{r}
+bestcp <- fit_tree$cptable[which.min(fit_tree$cptable[,"xerror"]),"CP"]
+pruned_tree <- prune(fit_tree, cp = bestcp)
+visTree(pruned_tree, edgesFontSize = 14, nodesFontSize = 16, width = "100%")
+```
+
+## 5.3 Model Evaluation
+
+::: callout-note
+## checking overfitting
+
+The training set R-squared (0.8285) is slightly higher than the test set (0.8239), the difference is about 0.47%, which is very small. In terms of MSE, the test set MSE is slightly higher than the training set, but the difference (0.00167) is also small. In conclusion, the performance of the training and test sets is very close, the model has almost no overfitting, and the generalization ability is good.
+:::
+
+R-squared is only 0.8239, and the model’s prediction ability is weak. It is recommended to use random forest or further adjust the parameters.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+train_pred <- predict(pruned_tree, newdata = df_train)
+test_pred <- predict(pruned_tree, newdata = df_test)
+
+train_mse <- mean((train_pred - df_train$Property_Prices)^2)
+test_mse <- mean((test_pred - df_test$Property_Prices)^2)
+train_r2 <- 1 - sum((train_pred - df_train$Property_Prices)^2) / 
+              sum((df_train$Property_Prices - mean(df_train$Property_Prices))^2)
+test_r2 <- 1 - sum((test_pred - df_test$Property_Prices)^2) / 
+             sum((df_test$Property_Prices - mean(df_test$Property_Prices))^2)
+
+cat(sprintf("Train MSE: %.6f", train_mse))
+cat(sprintf("Test MSE: %.6f", test_mse))
+cat(sprintf("Train R-squared: %.6f", train_r2))
+cat(sprintf("Test R-squared: %.6f", test_r2))
+```
+
+Through the cp table, select an optimal CP value to prune the tree to balance fitting and generalization capabilities. The CP value with the lowest xerror is usually chosen because this indicates that the model performs best on unseen data. ( can be put in shiny)
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+
+cp_table <- as.data.frame(pruned_tree$cptable)
+names(cp_table) <- c("CP", "nsplit", "rel_error", "xerror", "xstd") 
+head(pruned_tree$cptable, 20)
+```
+
+## 5.4 Visualization
+
+### 5.4.1 Predicted vs Actual Plot
+
+The points were generally close to the line, confirming the model's reasonable predictive performance.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+train_pred <- predict(pruned_tree, newdata = df_train)
+train_sse <- sum((train_pred - df_train$Property_Prices)^2)
+train_sst <- sum((df_train$Property_Prices - mean(df_train$Property_Prices))^2)
+train_r2 <- 1 - train_sse / train_sst
+df_test$Predicted <- predict(pruned_tree, newdata = df_test)
+
+tree_scatter <- ggplot(df_test, aes(x = Property_Prices, y = Predicted)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +  
+  labs(
+    x = "Actual Property_Prices",
+    y = "Predicted Property_Prices",
+    title = paste0("R-squared (train): ", round(train_r2, 2))
+  ) +
+  theme(
+    axis.text = element_text(size = 5),
+    axis.title = element_text(size = 8),
+    plot.title = element_text(size = 8)
+  )
+tree_scatter
+```
+
+We can also compare the actual and predicted data by using boxplot.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+plot_data <- data.frame(
+  Value = c(df_test$Property_Prices, df_test$Predicted),
+  Type = rep(c("Actual", "Predicted"), each = nrow(df_test))
+)
+ggplot(plot_data, aes(x = Type, y = Value, fill = Type)) +
+  geom_boxplot() +
+  labs(x = NULL, y = "Property Prices", title = "Boxplot of Actual vs Predicted") +
+  theme_minimal()
+```
+
+### 5.4.2 Residual Plot
+
+The residual plot showed that residuals were mostly centered around 0, with a slight left skew, indicating that the model occasionally underestimates property prices.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+residuals <- test_pred - df_test$Property_Prices
+plot_data <- data.frame(Predicted = test_pred, Residuals = residuals)
+ggplot(plot_data, aes(x = Predicted, y = Residuals)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = "red") +
+  labs(title = "Residuals vs Predicted", x = "Predicted Property Prices", y = "Residuals") +
+  theme_minimal()
+```
+
+### 5.4.3 Feature Importance
+
+A bar plot of feature importance highlighted Size the most influential predictors of property prices, while features like Bus_Stop had small impact.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+vi <- pruned_tree$variable.importance
+vi_df <- data.frame(
+  Variable = names(vi),
+  Importance = as.numeric(vi)
+)
+
+ggplot(vi_df, aes(x = reorder(Variable, Importance), y = Importance)) +
+  geom_col(fill = "lightblue") +
+  geom_text(aes(label = round(Importance, 2)), hjust = -0.2, size = 3) +  
+  coord_flip() +
+  labs(x = NULL, y = "Importance", title = "Variable Importance from Regression Tree Model") +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+
+# 6. Random Forest
+
+## 6.1 Building Model
+
+The default is 8:2 for the training and testing data set. The user can choose the seed number and the ratio of training data.
+
+```{r}
+set.seed(1234)
+
+trainIndex <- createDataPartition(Property_data_analysis$`Property_Prices`, p = 0.8, list = FALSE,  times = 1)
+
+df_train <- Property_data_analysis[trainIndex,]
+df_test <- Property_data_analysis[-trainIndex,]
+```
+
+```{r eval=FALSE}
+#| code-fold: true
+#| code-summary: "find the best setting"
+
+registerDoParallel(cores = 4)
+
+trctrl_none <- trainControl(method = "none")
+trctrl_cv <- trainControl(method = "cv", number = 5, verboseIter = TRUE)  trctrl_repeatedcv <- trainControl(method = "repeatedcv", number = 5, repeats = 3, verboseIter = TRUE)  
+trctrl_boot <- trainControl(method = "boot", number = 5, verboseIter = TRUE)
+
+
+tune_grid <- expand.grid( mtry = c(2, 4, 8),
+                          min.node.size = c(3, 5, 10), splitrule = c("variance", "extratrees") )
+
+
+evaluate_model <- function(tr_control, num_trees, importance_method) 
+  { rf_model <- train( Property_Prices ~ ., data = df_train, method = "ranger", trControl = tr_control, tuneGrid = tune_grid, num.trees = num_trees, importance = importance_method )
+
+
+  best_params <- rf_model$bestTune cat("Cross-validation results:\n") 
+  print(cv_results) cat("Best parameters:", best_params$mtry, best_params$min.node.size, best_params$splitrule, "\n")
+
+predictions <- predict(rf_model, newdata = df_test) mse <- mean((predictions - df_test$`Property_Prices`)^2)
+  sst <- sum((df_test$Property_Prices - mean(df_test$`Property_Prices`))^2)
+  sse <- sum((predictions - df_test$Property_Prices)^2) r_squared <- 1 - sse / sst cat("Test MSE:", mse, "\n") cat("Test R-squared:", r_squared, "\n")
+
+return(list(model = rf_model, cv_results = cv_results, test_mse = mse, test_r_squared = r_squared)) }
+
+
+
+cat("\n=== 5-fold CV, num.trees = 50, importance = impurity ===\n") result_cv_50_impurity <- evaluate_model(trctrl_cv, 50, "impurity")
+
+
+cat("\n=== Repeated CV (5-fold, 3 repeats), num.trees = 100, importance = permutation ===\n") result_repeatedcv_100_permutation <- evaluate_model(trctrl_repeatedcv, 100, "permutation")
+
+
+cat("\n=== Bootstrap, num.trees = 200, importance = impurity ===\n") result_boot_200_impurity <- evaluate_model(trctrl_boot, 200, "impurity")
+
+
+results_summary <- data.frame( Method = c("5-fold CV", "Repeated CV (5-fold, 3 repeats)", "Bootstrap"), Num_Trees = c(50, 100, 200), Importance = c("impurity", "permutation", "impurity"), Test_MSE = c(result_cv_50_impurity$test_mse,
+               result_repeatedcv_100_permutation$test_mse, result_boot_200_impurity$test_mse),
+  Test_R_squared = c(result_cv_50_impurity$test_r_squared, result_repeatedcv_100_permutation$test_r_squared,
+                     result_boot_200_impurity$test_r_squared) ) print(results_summary)
+
+best_method <- results_summary[which.max(results_summary$Test_R_squared), ] cat("\nBest analysis method:\n") print(best_method) '''
+```
+
+```{r}
+# user can choose to set random seed  (default 1234)
+# user can choose the tuning method :none, cv, repeatedcv, boot(default)
+# user can choose splitrule: variance(default), extratrees, maxstat, beta
+# user can choose num of tree :5-200 (200 is default)
+# user can choose feature importance :"impurity", "permutation
+
+trctrl <- trainControl(method = "boot", number = 5, verboseIter = TRUE)  # number of boot is default
+
+
+tune_grid <- expand.grid(
+  mtry = 8,  # default
+  min.node.size = 3,  # default
+  splitrule = "variance"  
+)
+
+
+rf_model <- train(
+  `Property_Prices` ~ ., 
+  data = df_train,
+  method = "ranger", 
+  trControl = trctrl,
+  tuneGrid = tune_grid,
+  num.trees = 200,  
+  importance = "impurity" 
+)
+
+```
+
+## 6.2 Model Evaluation
+
+The high R-squared on the test set (0.97) indicates that the random forest model captures the underlying patterns in the data effectively, outperforming the regression tree model (test R-squared of 0.82).
+
+If the training set performance (such as R-squared) is much higher than the test set, it may be overfitting. The difference is about 2%, showing slight overfitting, but not a big difference.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+
+
+predictions <- predict(rf_model, newdata = df_test)
+mse <- mean((predictions - df_test$`Property_Prices`)^2)
+r_squared <- 1 - sum((predictions - df_test$`Property_Prices`)^2) / 
+                 sum((df_test$`Property_Prices` - mean(df_test$`Property_Prices`))^2)
+
+train_predictions <- predict(rf_model, newdata = df_train)
+train_mse <- mean((train_predictions - df_train$`Property_Prices`)^2)
+train_sst <- sum((df_train$`Property_Prices` - mean(df_train$`Property_Prices`))^2)
+train_sse <- sum((train_predictions - df_train$`Property_Prices`)^2)
+train_r_squared <- 1 - train_sse / train_sst
+
+cat("Test MSE:", mse)
+cat("Test R-squared:", r_squared)
+cat("Train MSE:", train_mse)
+cat("Train R-squared:", train_r_squared)
+
+cat("Difference between test and train R-squared:", train_r_squared - r_squared, "\n")
+```
+
+OOB MSE is the error estimate of unseen data. If it is stable as the number of trees increases, the model has good generalization ability. In this figure, the OOB MSE stabilizes after 50 trees and does not increase significantly, indicating that the model is not overfitted. If it is overfitted, the OOB MSE may start to rise after a certain point.\
+The training set MSE is lower than the OOB and test sets, indicating that the model slightly overfits the training data, but the impact is not significant.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+oob_errors <- sapply(seq(10, 200, by = 10), function(ntree) {
+  model <- ranger(`Property_Prices` ~ ., data = df_train, num.trees = ntree, importance = "impurity")
+  return(model$prediction.error)
+})
+plot(seq(10, 200, by = 10), oob_errors, type = "l", xlab = "Number of Trees", ylab = "OOB MSE", main = "OOB Error vs Number of Trees")
+
+oob_mse <- rf_model$finalModel$prediction.error
+cat("OOB MSE:", oob_mse, "\n")
+```
+
+## 6.3 Visualization
+
+### 6.3.1 Predicted vs Actual Plot
+
+Based on the chart, the points were closely aligned with the line, confirming the model's high predictive accuracy (test R-squared of 0.972). The residuals were mostly centered around 0 with minimal spread, indicating that the model's predictions were highly accurate and lacked systematic bias.
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+df_test$Predicted <- predict(rf_model, newdata = df_test)
+
+rf_scatter <- ggplot(df_test, aes(x = Property_Prices, y = Predicted)) +
+  geom_point() +
+  labs(
+    x = "Actual Property_Prices",
+    y = "Predicted Property_Prices",
+    title = paste0("R-squared (train): ", round(rf_model$finalModel$r.squared, 2))
+  ) +
+  theme(
+    axis.text = element_text(size = 5),
+    axis.title = element_text(size = 8),
+    plot.title = element_text(size = 8)
+  )
+
+df_test$Residuals <- df_test$Predicted - df_test$Property_Prices
+
+rf_residuals <- ggplot(df_test, aes(x = Property_Prices, y = Residuals)) + 
+  geom_point(color = "blue3") +
+  labs(
+    x = "Actual Property_Prices",
+    y = "Residuals (Predicted - Actual)"
+  ) + 
+  geom_hline(yintercept = 0, color = "red4", linetype = "dashed", linewidth = 0.5) + 
+  theme(
+    axis.text = element_text(size = 5),
+    axis.title = element_text(size = 8)
+  )
+
+p <- rf_scatter + rf_residuals +
+  plot_annotation(
+    title = "Scatterplot of Predicted vs. Actual Property_Prices",
+    theme = theme(plot.title = element_text(size = 18))
+  )
+
+
+p
+```
+
+### 6.3.2 Feature Importance
+
+The plot highlighted that Size, Parking, Highest_Floor, Year, and Units were the most influential predictors of property prices, while features like spring had negligible importance (scores close to 0).
+
+```{r}
+#| code-fold: true
+#| code-summary: "show the code"
+vi <- varImp(rf_model)
+vi_df <- as.data.frame(vi$importance)
+vi_df$Variable <- rownames(vi_df)
+
+ggplot(vi_df, aes(x = reorder(Variable, Overall), y = Overall)) +
+  geom_col(fill = "steelblue") +
+  geom_text(aes(label = round(Overall, 2)), hjust = -0.2, size = 3) +  # 
+  coord_flip() +
+  labs(x = NULL, y = "Importance (Overall)", title = "Variable Importance from Random Forest Model") +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+
+# 7. Prototype for Shiny
+
+::: panel-tabset
+## Regression Tree
+
+We will create the residual plot/actual vs predicted box plot in the same tab as the actual vs predicted scatter chart.
+
+Range Setting:
+
+-   set seed: 0-9999 (default: 1234)
+-   minsplit: 2-20 (default: 5)
+-   complexity_parameter: 0.001-0.5 (default: 0.060)
+-   max_depth: 2-20 (default: 10)
+
+![](images/clipboard-2016349390.png)
+
+## Random Forest
+
+We would like to put the ideal setting for this model and the insight we gain on the text box.
+
+Range/Selection Setting:
+
+-   set seed: 0-9999 (default: 1234)
+-   Num of tree: 5-200 (default:200)
+-   Tuning method: none, cv, repeatedcv, boot(default)
+-   Split rule: variance(default), extratrees, maxstat, beta
+-   Feature importance: impurity, permutation
+
+![](images/clipboard-3606057818.png)
+:::

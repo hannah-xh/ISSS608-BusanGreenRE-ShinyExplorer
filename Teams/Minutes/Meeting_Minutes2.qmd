@@ -1,0 +1,71 @@
+---
+title: "Project Meeting 2:  Project Proposal"
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+::: callout-tip
+## Info
+
+**Attendance**: Moo Jia Rong, Zhang Xiao Han, Chen Peng-Wei
+
+**Date**: 08/03/2025 3.30pm – 5.30pm
+
+**Meeting Agenda:**
+
+-   Project Proposal Storyboard Design
+-   Website Design
+-   Proposal, Data Cleaning & Shiny app Task allocations
+-   Follow-up Action
+:::
+
+## Agenda Item 1: Project Proposal Storyboard Design
+
+Jia Rong suggested that the team could approach data analyses through segregating into univariate, bivariate and multivariate analyses. Jia Rong suggested doing boxplot and histogram for univariate analysis, scatter plot and correlation heat map for bivariate analysis. Xiao Han suggested combining box plot and smoothed histogram together in one plot and doing radar plot and geospatial plot. 
+
+Peng-Wei suggested adding summary of mean and median values above the plot for the univariate analysis. Xiao Han suggested doing cluster analysis and radar chart for multivariate analysis. Jia Rong suggested adding a parallel coordinate plot to visualize the cluster analysis results.  
+
+Peng-Wei pointed out that our dataset is not very suitable for creating geospatial visualizations as the dataset only has the longitude and latitude coordinates but no region or city data. The team agreed and decided to not focus on geospatial visualizations. Peng Wei also suggested using Canva to draw out the storyboard. 
+
+## Agenda Item 2: Website Design
+
+Xiao Han suggested that we can use the CSS to decorate the website. 
+
+Peng-Wei proposed using basic CSS for the initial design before adding complex features. 
+
+Jia Rong recommended adding a navigation bar at the top with clear labels. 
+
+All agree that the team could develop a website with a green color scheme to match the visualization designs and the overall theme of the project. 
+
+## Agenda Item 3: Proposal, Data Cleaning & Shiny app Task allocations
+
+### 3.1 Proposal
+
+For the proposal, all team members agree to continue working on the proposal, with Jia Rong finishing the write-up, Xiao Han working on the storyboard and Peng-Wei working on the website design. 
+
+To ensure the quality of proposal all team members agree that doing cross check for each other's part of work and then settle down the whole proposal after checking. 
+
+### 3.2 Data Cleaning & Shiny app Task allocations
+
+All will work on data cleaning to prepare for the project analyses. The submodules will be split amongst the members as follows: 
+
+Xiao Han will handle the cluster analysis components of the Shiny app, including implementation of clustering and visualization of parallel coordinate plot. 
+
+Jia Rong will focus on bivariate analysis functionality, developing the correlation heatmap and scatterplot components with interactive selection controls. 
+
+Peng-Wei will be responsible for radar chart implementation and univariate analysis features, including summary statistics, boxplots, and distribution visualizations. 
+
+Each team member will handle data cleaning for their respective modules while maintaining consistent data structures for integration. 
+
+## Agenda Item 4: Follow-up Action
+
+Peng-Wei needs to upload the proposal on the website before 10 March. 
+
+Jia Rong will finalize the proposal write-up by 9 March and share with team members for review. 
+
+Xiao Han will complete the storyboard designs using Canva by 9 March for team feedback. 
+
+All team members will review each other's work and provide feedback by 10 March to ensure the proposal is ready for submission. 

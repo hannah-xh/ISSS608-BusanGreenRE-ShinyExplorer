@@ -1,0 +1,119 @@
+---
+css: style.css
+---
+
+```{=html}
+<style>
+.page-title {
+  color: white; 
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);  
+  margin-top: 0; 
+}
+
+body {
+  background-image: url('background.png');
+  background-size: cover; 
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed; 
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.text-block {
+  background-color: rgba(255, 255, 255, 0.9); 
+  padding: 2em;
+  max-width: 800px;
+  margin: 1em auto; 
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  color: #333; /* 深灰色文字 */
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); 
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  max-width: 800px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  text-align: center;
+  margin: 10px;
+}
+.card iframe {
+  width: 100%; 
+  height: 200px; 
+  border: none; 
+.card a {
+  text-decoration: none;
+  color: #007BFF;
+  font-weight: bold;
+}
+.card a:hover {
+  color: #0056b3;
+}
+
+.card-container {
+  display: flex; /* 使用 Flexbox 並排 */
+  gap: 20px; /* 卡片之間的間距 */
+  justify-content: center; /* 水平居中對齊 */
+}
+
+@media (max-width: 768px) {
+  body {
+    background-size: cover; 
+  }
+  
+  .text-block {
+    margin: 0.5em; 
+    padding: 1em; 
+    max-width: 100%; 
+  }
+}
+
+@media (max-width: 600px) {
+  .card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+</style>
+```
+
+::::: text-block
+<h1 class="page-title">
+
+Green Spaces and Real Estate: Exploring the Influence of Environmental Factors on Housing Prices in Busan
+
+</h1>
+
+::: text-block
+**Welcome to isss608 Group Project**\
+Welcome to the Group5 project homepage! The primary objective of this project is to investigate how various factors, with a greater focus on the environmental amenities and the built environment factors, influences property prices in Korea. The project seeks to understand whether properties located closer to green spaces and other amenities tend to have higher market values. The secondary objective is to explore the interaction between green amenities, the built environment, and other factors, such as neighborhood demographics and seasonality, in shaping property prices.
+:::
+
+::: text-block
+**Project Overview**\
+In this project, we integrate various state-of-the-art data analysis methods—from Exploratory Data Analysis (EDA) and Confirmatory Data Analysis (CDA) to Explanatory Modeling and Predictive Modeling. Our comprehensive analytical approach is designed to reveal the underlying value of the data, providing actionable insights that can inform decision-making and drive practical applications.
+:::
+
+background photo sources: [canva](https://www.canva.com/zh_tw/)
+:::::
+
+
+
+<div class="card">
+  <h3>Shiny App</h3>
+  <iframe src="https://isss608trista.shinyapps.io/Shiny_app/" width="300" height="200" frameborder="0"></iframe>
+  <br>
+  <a href="https://isss608trista.shinyapps.io/Shiny_app/">Go explore</a>
+</div>
+
+<div class="card">
+  <h3>Prototype</h3>
+  <iframe src="https://isss608group5.netlify.app/prototype/eda/take-home_ex03" width="300" height="200" frameborder="0"></iframe>
+  <br>
+  <a href="https://isss608group5.netlify.app/prototype/eda/take-home_ex03">Go explore</a>
+</div>
+

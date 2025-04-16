@@ -1,0 +1,70 @@
+---
+title: "Project Meeting 1: Project Dataset, Project Proposal and Project Timeline"
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+::: callout-note
+## Info
+
+**Attendance**: Chen.PengWei, Moo.JiaRong, Zhang.XiaoHan
+
+**Date**: 23/02/2025 4.00pm – 05.30pm
+
+**Meeting Agenda:**
+
+-   Project Topic/Dataset\
+-   Project Timeline\
+-   Project Proposal\
+-   Website Design Method\
+-   Follow-up Action\
+:::
+
+## Agenda Item 1: Project Topic/Dataset
+
+Peng-Wei suggested using a traffic dataset from Taiwan, which has details on the weather and location of the accidents.  However, as the dataset is in Chinese, the group decided that it will take too much time to encode the data in English. 
+
+Xiao Han suggested working on a dataset about problematic internet use in children. However, this dataset requires a lot of encoding and might be more suitable for machine learning. 
+
+Jia Rong suggested using the Seoul Bike Sharing Demand dataset and conducting EDA and a prediction model on it. However, the dataset is a bit old (2017–2018). 
+
+Xiaohan mentioned that the global traffic accident dataset could be used, but Jia Rong thinks that the dataset has too few feature columns. However, Peng-wei and Xiaohan believe that this dataset is more suitable for visualization as it includes latitude and longitude information. 
+
+In the end, all three agreed to choose the Seoul bicycle dataset and the global traffic accident dataset as alternatives and will consult the professor later. 
+
+## Agenda Item 2: Project Timeline 
+
+This timeline outlines key tasks, including proposal drafting, data cleaning, Shiny module development, poster creation, and user guide completion, ensuring a structured workflow. 
+
+![](images/clipboard-869089845.png)
+
+## Agenda Item 3: Project Proposal
+
+\
+Below is the proposal structure that we have agreed on: \
+(1) Motivations  \
+(2) Objective  \
+(3) Dataset description  \
+(4) Method – Data analysis approaches and the 3 different Shiny sub-modules each member will work on  \
+(5) Prototype/storyboard drawing  \
+(6) List of R packages that we will use   \
+(7) Project timeline in Gantt Chart \
+
+## Agenda Item 4: Website design method
+
+For the presentation style of the website, we want it to look professional and visually appealing, but without overly cute elements, as our content is related to transportation. 
+
+Our initial idea is to place relevant images on the homepage and design a professional and aesthetically pleasing logo. 
+
+### **Agenda Item 5: Follow-up Action**
+
+Peng-Wei will send the email to professor to check which dataset (Seoul Bike Sharing & Global traffic) is more suitable to use in this project after this meeting. \
+
+::: callout-note
+## **Before the next meeting:** 
+
+All team members will work on brainstorming the analysis approach, the type of visualizations we can create using our selected dataset and the potential topic for our project.
+:::

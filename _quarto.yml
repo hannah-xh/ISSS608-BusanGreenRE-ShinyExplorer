@@ -1,0 +1,49 @@
+project:
+  type: website
+
+
+website:
+  title: "isss608 Group 5"
+  navbar:
+    right:
+      - icon: "bi bi-house-fill" 
+        href: index.qmd
+        text: Home
+      
+      - text: "Teams"
+        menu:
+          - text: "Proposal"
+            href: Teams/Proposal/proposal.qmd
+          - text: "Meeting Minutes"
+            href: Teams/Minutes/Meeting_Minutes.qmd
+          - text: "About Us"
+            href: Teams/About_Us/About_Us.qmd
+            
+      - text: "Prototype"
+        menu:
+          - text: "Exploratory Data Analysis & Confirmatory Data Analysis"
+            href: Prototype/EDA/Take-home_Ex03.qmd
+          - text: "Explanatory Modeling"
+            href: Prototype/Explanatory/Take-home_Ex3a.qmd
+          - text: "Explanatory Modeling 2"
+            href: Prototype/Explanatory/Take-home_Ex3b.qmd
+          - text: "Predictive Modeling"
+            href: Prototype/Predictive/Take-home_Ex3.qmd
+      - text: "Poster"
+        href: "Poster/Poster.pdf"
+      - text: "Shiny app"
+        menu:
+          - text: "Shiny app"
+            href: "https://isss608trista.shinyapps.io/Shiny_app/"
+          - text: "User Guide"
+            href: "Shiny_app/User_guide/User_guide.pdf"
+            
+
+
+format:
+  html:
+    css: styles.css
+    toc: true
+
+editor: visual
+

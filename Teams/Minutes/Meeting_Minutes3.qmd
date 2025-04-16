@@ -1,0 +1,43 @@
+---
+title: "Project Meeting 3:  Project Proposal 2"
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+::: callout-tip
+## Info
+
+**Attendance**: Moo Jia Rong, Zhang Xiao Han, Chen Peng-Wei
+
+**Date**: 22/03/2025 5.00pm – 6.00pm
+
+**Meeting Agenda:**
+
+-   Project Modules & Shiny app Task allocations (updated base on prof reply)
+-   Follow-up Action
+:::
+
+## Agenda Item 1: Project Modules & Shiny app Task allocations
+
+Following Prof’s feedback on our proposal, the team decided to re-consider the modules to be created for the project. Prof recommended the team to split the modules according to (1) EDA & CDA, (2) Explanatory Modelling and (3) Predictive Modelling.  
+
+Jia Rong said that the modules the team has previously proposed are all on EDA & CDA. Hence the team should select a few of the previous ideas and work on it as 1 module for EDA & CDA. For example, the team could do the boxplot and smoothed histogram for EDA, the scatterplot and the correlation heatmap as CDA. In addition, boxplot for ANOVA can be added for CDA. 
+
+For explanatory modelling, Jia Rong suggested doing multiple linear regression and perhaps latent class analysis, with reference to senior’s work. As for predictive modelling, Jia Rong suggested trying out random forest and decision tree. 
+
+Peng-Wei suggested that for the random forest part, we can provide an interactive adjustment interface for parameters (such as the number of trees , the number of variables), and instantly displays the model's prediction performance (such as Accuracy, RMSE, MAE, etc.) in the Shiny app. As for the decision Tree, we can make user adjust parameters such as tree depth and splitting method on the interface, and displaying auxiliary analysis charts such as predicted vs. actual values, residual plots, etc. 
+
+Xiao Han suggested using tidyverse, car, and lmtest packages for multiple linear regression analysis with ggplot2 for regression diagnostic plots, while implementing poLCA, mclust, and flexmix packages for latent class analysis since you have previous experience with this technique. She also recommended creating interactive elements using shiny, shinydashboard, and plotly to allow users to dynamically select variables and adjust model parameters. 
+
+## Agenda Item 2: Follow-up Action
+
+Jia Rong will work on the EDA + CDA submodule. 
+
+Peng-Wei will work on the predictive modelling module. 
+
+Xiao Han will work on the explanatory modelling module. 
+
+All team members agreed to finish their modules by 29th March and have another meeting to work on the poster and the user guide. 
